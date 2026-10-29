@@ -55,11 +55,13 @@ function sprawdzKomendy(dane) {
 function wywolanie(system, komenda) {
   // Windows: komenda idzie w zmiennej środowiskowej i jest parsowana jako osobny skrypt. Wklejona za przygotowaniem
   // (kodowanie, PATH) trafiała do komunikatów błędów: „At line:1 char:189 + ... GetEnvironmentVariable(...); claude”,
-  // a w prawdziwym oknie jest „At line:1 char:1 + claude --version”.
+  // a w prawdziwym oknie jest „At line:1 char:1 + claude --version”. Wywołanie bloku samo kończy się sukcesem, więc
+  // błąd komendy przekazujemy jako kod wyjścia w linii za nią (bez tego każda komenda dawała kod 0).
   if (system === 'windows') {
+    const kodWyjscia = 'if (-not $?) { if ($LASTEXITCODE) { exit $LASTEXITCODE } else { exit 1 } }';
     return {
       program: 'powershell.exe',
-      argumenty: ['-NoProfile', '-NoLogo', '-NonInteractive', '-Command', `${UTF8}${PATH_Z_REJESTRU}. ([scriptblock]::Create($env:KURS_KOMENDA))`],
+      argumenty: ['-NoProfile', '-NoLogo', '-NonInteractive', '-Command', `${UTF8}${PATH_Z_REJESTRU}. ([scriptblock]::Create($env:KURS_KOMENDA + "\`n" + '${kodWyjscia}'))`],
       srodowisko: { KURS_KOMENDA: komenda },
     };
   }
