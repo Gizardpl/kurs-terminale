@@ -53,8 +53,15 @@ function sprawdzKomendy(dane) {
 
 /** Program i argumenty, którymi zwykły użytkownik danego systemu uruchomiłby komendę w nowym terminalu. */
 function wywolanie(system, komenda) {
+  // Windows: komenda idzie w zmiennej środowiskowej i jest parsowana jako osobny skrypt. Wklejona za przygotowaniem
+  // (kodowanie, PATH) trafiała do komunikatów błędów: „At line:1 char:189 + ... GetEnvironmentVariable(...); claude”,
+  // a w prawdziwym oknie jest „At line:1 char:1 + claude --version”.
   if (system === 'windows') {
-    return { program: 'powershell.exe', argumenty: ['-NoProfile', '-NoLogo', '-NonInteractive', '-Command', UTF8 + PATH_Z_REJESTRU + komenda] };
+    return {
+      program: 'powershell.exe',
+      argumenty: ['-NoProfile', '-NoLogo', '-NonInteractive', '-Command', `${UTF8}${PATH_Z_REJESTRU}. ([scriptblock]::Create($env:KURS_KOMENDA))`],
+      srodowisko: { KURS_KOMENDA: komenda },
+    };
   }
   // zsh czyta komendę z wejścia: przy `-c` komunikaty błędów mają numer linii („zsh:1: command not found”), a w oknie
   // Terminala go nie ma („zsh: command not found”). Tryb interaktywny (-i) bez prawdziwego terminala dopisuje do wyjścia
@@ -68,7 +75,9 @@ function wywolanie(system, komenda) {
 function komendaPromptu(system) {
   if (system === 'windows') return 'prompt';
   if (system === 'macos') return 'print -rP -- "$PROMPT"';
-  return 'echo "${PS1@P}"';
+  // Ubuntu ustawia PS1 w ~/.bashrc tylko w powłoce interaktywnej, więc przy `bash -c` jest pusty; bierzemy domyślny
+  // prompt z /etc/skel/.bashrc („\u@\h:\w\$ ”), bez kolorów.
+  return 'PS1=\'\\u@\\h:\\w\\$ \'; echo "${PS1@P}"';
 }
 
 /** Tekst, jaki zobaczyłby człowiek: prompt z komendą, potem wyjście (stdout, a po nim stderr). */
@@ -80,9 +89,9 @@ function tekstTerminala({ prompt, komenda, stdout, stderr }) {
 const nazwaPliku = (lp, id) => `${String(lp).padStart(2, '0')}-${id}`;
 
 function uruchom(system, komenda, cwd, limitS, spawn = spawnSync, env = process.env) {
-  const { program, argumenty, wejscie = '' } = wywolanie(system, komenda);
+  const { program, argumenty, wejscie = '', srodowisko = {} } = wywolanie(system, komenda);
   const start = Date.now();
-  const r = spawn(program, argumenty, { cwd, env, encoding: 'utf8', input: wejscie, timeout: limitS * 1000, windowsHide: true, maxBuffer: 32 * 1024 * 1024 });
+  const r = spawn(program, argumenty, { cwd, env: { ...env, ...srodowisko }, encoding: 'utf8', input: wejscie, timeout: limitS * 1000, windowsHide: true, maxBuffer: 32 * 1024 * 1024 });
   return {
     stdout: r.stdout || '',
     stderr: r.stderr || '',

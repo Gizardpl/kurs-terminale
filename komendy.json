@@ -22,6 +22,14 @@
       }
     },
     {
+      "id": "claude-path-windows",
+      "opis": "Windows: dopisanie ~/.local/bin do PATH użytkownika, o co prosi instalator Claude Code (odpowiednik kroku w oknie Zmienne środowiskowe)",
+      "katalog": "dom",
+      "systemy": {
+        "windows": "[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path','User') + ';' + \"$env:USERPROFILE\\.local\\bin\", 'User')"
+      }
+    },
+    {
       "id": "claude-wersja",
       "opis": "claude --version w nowym terminalu po instalacji",
       "katalog": "dom",
