@@ -1,0 +1,149 @@
+{
+  "komendy": [
+    {
+      "id": "claude-przed-instalacja",
+      "opis": "claude przed instalacją (błąd nieznanej komendy)",
+      "katalog": "dom",
+      "systemy": {
+        "windows": "claude --version",
+        "macos": "claude --version",
+        "linux": "claude --version"
+      }
+    },
+    {
+      "id": "claude-instalacja",
+      "opis": "instalacja Claude Code",
+      "katalog": "dom",
+      "limitS": 600,
+      "systemy": {
+        "windows": "irm https://claude.ai/install.ps1 | iex",
+        "macos": "curl -fsSL https://claude.ai/install.sh | bash",
+        "linux": "curl -fsSL https://claude.ai/install.sh | bash"
+      }
+    },
+    {
+      "id": "claude-wersja",
+      "opis": "claude --version w nowym terminalu po instalacji",
+      "katalog": "dom",
+      "systemy": {
+        "windows": "claude --version",
+        "macos": "claude --version",
+        "linux": "claude --version"
+      }
+    },
+    {
+      "id": "claude-doctor",
+      "opis": "claude doctor",
+      "katalog": "dom",
+      "limitS": 90,
+      "systemy": {
+        "windows": "claude doctor",
+        "macos": "claude doctor",
+        "linux": "claude doctor"
+      }
+    },
+    {
+      "id": "codex-przed-instalacja",
+      "opis": "codex przed instalacją (błąd nieznanej komendy)",
+      "katalog": "dom",
+      "systemy": {
+        "windows": "codex --version",
+        "macos": "codex --version",
+        "linux": "codex --version"
+      }
+    },
+    {
+      "id": "codex-instalacja",
+      "opis": "instalacja Codex",
+      "katalog": "dom",
+      "limitS": 600,
+      "systemy": {
+        "windows": "powershell -ExecutionPolicy ByPass -c \"irm https://chatgpt.com/codex/install.ps1 | iex\"",
+        "macos": "curl -fsSL https://chatgpt.com/codex/install.sh | sh",
+        "linux": "curl -fsSL https://chatgpt.com/codex/install.sh | sh"
+      }
+    },
+    {
+      "id": "codex-wersja",
+      "opis": "codex --version w nowym terminalu po instalacji",
+      "katalog": "dom",
+      "systemy": {
+        "windows": "codex --version",
+        "macos": "codex --version",
+        "linux": "codex --version"
+      }
+    },
+    {
+      "id": "codex-doctor",
+      "opis": "codex doctor",
+      "katalog": "dom",
+      "limitS": 90,
+      "systemy": {
+        "windows": "codex doctor",
+        "macos": "codex doctor",
+        "linux": "codex doctor"
+      }
+    },
+    {
+      "id": "git-wersja",
+      "opis": "git --version (na runnerze Git jest wgrany w obrazie)",
+      "katalog": "projekt",
+      "systemy": {
+        "windows": "git --version",
+        "macos": "git --version",
+        "linux": "git --version"
+      }
+    },
+    {
+      "id": "git-nazwa",
+      "opis": "git config user.name (dane zmyślone)",
+      "katalog": "projekt",
+      "systemy": {
+        "windows": "git config --global user.name \"Jan Kowalski\"",
+        "macos": "git config --global user.name \"Jan Kowalski\"",
+        "linux": "git config --global user.name \"Jan Kowalski\""
+      }
+    },
+    {
+      "id": "git-email",
+      "opis": "git config user.email (dane zmyślone)",
+      "katalog": "projekt",
+      "systemy": {
+        "windows": "git config --global user.email \"jan@example.com\"",
+        "macos": "git config --global user.email \"jan@example.com\"",
+        "linux": "git config --global user.email \"jan@example.com\""
+      }
+    },
+    {
+      "id": "node-wersja",
+      "opis": "node -v (na runnerze Node.js jest wgrany w obrazie)",
+      "katalog": "projekt",
+      "systemy": {
+        "windows": "node -v",
+        "macos": "node -v",
+        "linux": "node -v"
+      }
+    },
+    {
+      "id": "claude-mcp-pomoc",
+      "opis": "claude mcp add --help (bez podłączania serwera)",
+      "katalog": "projekt",
+      "systemy": {
+        "windows": "claude mcp add --help",
+        "macos": "claude mcp add --help",
+        "linux": "claude mcp add --help"
+      }
+    },
+    {
+      "id": "claude-mcp-lista",
+      "opis": "claude mcp list w pustym projekcie",
+      "katalog": "projekt",
+      "limitS": 90,
+      "systemy": {
+        "windows": "claude mcp list",
+        "macos": "claude mcp list",
+        "linux": "claude mcp list"
+      }
+    }
+  ]
+}

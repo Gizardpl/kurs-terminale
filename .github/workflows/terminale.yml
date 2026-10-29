@@ -1,0 +1,73 @@
+# Prawdziwe wyjście terminali na Windows, macOS i (opcjonalnie) Linuksie.
+# Tylko uruchomienie ręczne. Po przebiegu workflow jest wyłączany (gh workflow disable) i włączany tylko na kolejny
+# hurtowy przebieg. Repo publiczne i standardowe runnery: bez opłat (bez runnerów „larger”).
+# Opis: README.md.
+name: terminale
+
+on:
+  workflow_dispatch:
+    inputs:
+      systemy:
+        description: "Systemy, rozdzielone przecinkami (windows, macos, linux)"
+        required: false
+        default: "windows,macos"
+      komendy:
+        description: "Lista komend jako JSON ({\"komendy\":[...]}); puste = plik komendy.json z repo"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  macierz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      systemy: ${{ steps.wybor.outputs.systemy }}
+    steps:
+      - id: wybor
+        env:
+          SYSTEMY: ${{ inputs.systemy }}
+        run: |
+          node -e '
+            const obrazy = { windows: "windows-latest", macos: "macos-latest", linux: "ubuntu-latest" };
+            const wybrane = (process.env.SYSTEMY || "windows,macos").split(",").map((s) => s.trim()).filter(Boolean);
+            const zle = wybrane.filter((s) => !obrazy[s]);
+            if (zle.length || !wybrane.length) { console.error("Nieznane systemy: " + zle.join(", ")); process.exit(1); }
+            const lista = [...new Set(wybrane)].map((system) => ({ system, obraz: obrazy[system] }));
+            require("fs").appendFileSync(process.env.GITHUB_OUTPUT, "systemy=" + JSON.stringify(lista) + "\n");
+          '
+
+  terminal:
+    needs: macierz
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.macierz.outputs.systemy) }}
+    runs-on: ${{ matrix.obraz }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lista komend
+        shell: bash
+        env:
+          KOMENDY: ${{ inputs.komendy }}
+        run: |
+          if [ -n "$KOMENDY" ]; then printf '%s' "$KOMENDY" > "$RUNNER_TEMP/komendy.json"; else cp komendy.json "$RUNNER_TEMP/komendy.json"; fi
+      # Na Windows krok startuje w Windows PowerShell 5.1 (shell: powershell), jak terminal zwykłego użytkownika;
+      # samo uruchamianie komend też idzie przez powershell.exe (uruchom.js), a pwsh nie jest używany.
+      - name: Komendy (Windows PowerShell 5.1)
+        if: matrix.system == 'windows'
+        shell: powershell
+        run: node uruchom.js "$env:RUNNER_TEMP\komendy.json" "$env:RUNNER_TEMP\wyniki"
+      - name: Komendy (zsh na macOS, bash na Linuksie)
+        if: matrix.system != 'windows'
+        shell: bash
+        run: node uruchom.js "$RUNNER_TEMP/komendy.json" "$RUNNER_TEMP/wyniki"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wyniki-${{ matrix.system }}
+          path: ${{ runner.temp }}/wyniki/${{ matrix.system }}
+          retention-days: 7
+          if-no-files-found: error
